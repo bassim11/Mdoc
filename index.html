@@ -1,0 +1,1099 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MDOC — نظام ملفات الموظفين</title>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&family=Cairo:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#080d18;--ink2:#0c1422;--blue:#152d58;
+  --gold:#c9a84c;--gold2:#e8c96a;--gold3:rgba(201,168,76,0.11);
+  --teal:#19c9a0;--red:#e05252;--amber:#f0a830;--purple:#a78bfa;
+  --text:#dde4ee;--text2:#8a9ab8;--text3:#4e5e78;
+  --card:rgba(255,255,255,0.032);--card2:rgba(255,255,255,0.058);
+  --border:rgba(201,168,76,0.17);--border2:rgba(255,255,255,0.065);
+  --glow:0 0 24px rgba(201,168,76,0.11);--r:13px;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Cairo',sans-serif;background:var(--ink);color:var(--text);min-height:100vh;direction:rtl;overflow-x:hidden;}
+body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:radial-gradient(ellipse 70% 55% at 15% 12%,rgba(21,45,88,0.38) 0%,transparent 65%),
+             radial-gradient(ellipse 55% 40% at 85% 88%,rgba(201,168,76,0.07) 0%,transparent 55%);}
+body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
+  background-image:repeating-linear-gradient(0deg,transparent,transparent 47px,rgba(255,255,255,0.011) 47px,rgba(255,255,255,0.011) 48px),
+                   repeating-linear-gradient(90deg,transparent,transparent 47px,rgba(255,255,255,0.011) 47px,rgba(255,255,255,0.011) 48px);}
+.app{position:relative;z-index:1;display:flex;min-height:100vh;}
+
+/* ── LEFT SIDEBAR ── */
+.lsb{width:268px;min-height:100vh;background:linear-gradient(180deg,rgba(8,13,24,0.97),rgba(12,20,34,0.97));
+  border-left:1px solid var(--border);display:flex;flex-direction:column;
+  position:sticky;top:0;height:100vh;flex-shrink:0;overflow:hidden;}
+.lsb-head{padding:22px 18px 18px;border-bottom:1px solid var(--border);position:relative;}
+.lsb-head::after{content:'';position:absolute;bottom:0;right:18px;left:18px;height:1px;
+  background:linear-gradient(90deg,transparent,var(--gold),transparent);opacity:0.45;}
+.brand{display:flex;align-items:center;gap:13px;}
+.brand-logo{width:48px;height:48px;border-radius:11px;overflow:hidden;
+  box-shadow:0 4px 16px rgba(201,168,76,0.32);flex-shrink:0;display:flex;align-items:center;justify-content:center;
+  background:rgba(201,168,76,0.08);border:1px solid var(--border);}
+.brand-logo img{width:100%;height:100%;object-fit:cover;border-radius:10px;}
+.bname{font-size:21px;font-weight:900;color:var(--text);letter-spacing:1px;font-family:'Tajawal',sans-serif;}
+.bsub{font-size:9.5px;color:var(--gold);letter-spacing:2px;text-transform:uppercase;margin-top:1px;font-weight:600;}
+.lsb-srch{padding:12px 14px;border-bottom:1px solid var(--border2);}
+.sbox{display:flex;align-items:center;gap:8px;background:var(--card2);border:1px solid var(--border2);
+  border-radius:9px;padding:7px 11px;transition:border-color 0.2s;}
+.sbox:focus-within{border-color:var(--gold);}
+.sbox input{background:none;border:none;outline:none;color:var(--text);font-family:'Cairo',sans-serif;
+  font-size:12px;width:100%;direction:rtl;}
+.sbox input::placeholder{color:var(--text3);}
+.lsb-list{flex:1;overflow-y:auto;padding:6px 0;}
+.erow{display:flex;align-items:center;gap:9px;padding:8px 14px;cursor:pointer;
+  transition:all 0.14s;border-right:3px solid transparent;}
+.erow:hover{background:var(--card);}
+.erow.active{background:var(--gold3);border-right-color:var(--gold);}
+.eav{width:31px;height:31px;border-radius:8px;display:flex;align-items:center;justify-content:center;
+  font-size:12px;font-weight:900;color:#fff;flex-shrink:0;font-family:'Tajawal',sans-serif;}
+.ern{font-size:12px;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:135px;}
+.eri{font-size:10px;color:var(--text3);margin-top:1px;}
+.shift-tag{font-size:9px;padding:1px 6px;border-radius:10px;margin-top:2px;display:inline-block;font-weight:700;}
+.sm{background:rgba(240,168,48,0.14);color:var(--amber);}
+.sr{background:rgba(167,139,250,0.14);color:var(--purple);}
+.lsb-empty{padding:36px 18px;text-align:center;color:var(--text3);font-size:12px;line-height:1.8;}
+.lsb-empty .ei{font-size:22px;margin-bottom:8px;opacity:0.28;}
+.lsb-foot{padding:12px 14px;border-top:1px solid var(--border2);}
+.st3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px;}
+.stm{background:var(--card);border:1px solid var(--border2);border-radius:7px;padding:7px 4px;text-align:center;}
+.stm .sv{font-size:16px;font-weight:900;color:var(--gold);font-family:'Tajawal',sans-serif;}
+.stm .sl{font-size:8.5px;color:var(--text3);margin-top:1px;}
+.addbtn{width:100%;margin-top:7px;background:linear-gradient(135deg,var(--gold),var(--gold2));
+  color:var(--ink);border:none;border-radius:9px;padding:9px;font-family:'Cairo',sans-serif;
+  font-size:12px;font-weight:800;cursor:pointer;transition:all 0.2s;
+  display:flex;align-items:center;justify-content:center;gap:5px;}
+.addbtn:hover{transform:translateY(-1px);box-shadow:0 5px 18px rgba(201,168,76,0.32);}
+
+/* ── MAIN ── */
+.main{flex:1;display:flex;flex-direction:column;min-width:0;}
+.topbar{padding:12px 22px;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--border2);
+  background:rgba(8,13,24,0.87);backdrop-filter:blur(16px);position:sticky;top:0;z-index:50;}
+.tb-title{font-size:17px;font-weight:800;color:var(--text);flex:1;}
+.tb-title span{color:var(--gold);}
+.tb-badge{display:flex;align-items:center;gap:5px;background:var(--card);border:1px solid var(--border2);
+  border-radius:7px;padding:5px 11px;font-size:11px;color:var(--text2);}
+.tb-badge .dot{width:6px;height:6px;border-radius:50%;background:var(--teal);}
+.content{padding:22px 24px;flex:1;overflow-y:auto;}
+
+/* ── RIGHT NAV SIDEBAR ── */
+.rsb{width:218px;min-height:100vh;background:linear-gradient(180deg,rgba(8,13,24,0.97),rgba(12,20,34,0.97));
+  border-right:1px solid var(--border);display:flex;flex-direction:column;
+  position:sticky;top:0;height:100vh;flex-shrink:0;overflow-y:auto;}
+.rsb-head{padding:20px 14px 12px;border-bottom:1px solid var(--border2);}
+.rsb-head .rh{font-size:10px;font-weight:800;color:var(--text3);letter-spacing:1.5px;text-transform:uppercase;}
+.rsb-nav{padding:8px 6px;flex:1;}
+.ni{display:flex;align-items:center;gap:9px;padding:9px 11px;border-radius:9px;cursor:pointer;
+  transition:all 0.14s;color:var(--text3);font-size:12.5px;font-weight:600;margin-bottom:2px;
+  border:1px solid transparent;}
+.ni:hover{background:var(--card);color:var(--text);}
+.ni.active{background:var(--gold3);color:var(--gold);border-color:var(--border);}
+.ni .ico{font-size:16px;width:18px;text-align:center;}
+.rsb-sec{padding:5px 14px 2px;font-size:9px;font-weight:800;color:var(--text3);
+  letter-spacing:1.5px;text-transform:uppercase;margin-top:6px;}
+.rsb-foot{padding:12px;border-top:1px solid var(--border2);}
+.rfi{background:var(--card);border:1px solid var(--border2);border-radius:9px;padding:11px;}
+.rfi .rfn{font-size:11.5px;font-weight:800;color:var(--text);margin-bottom:3px;}
+.rfi .rfi2{font-size:10px;color:var(--text3);}
+.rfi .rfp{font-size:11px;margin-top:5px;padding:3px 8px;border-radius:6px;
+  background:rgba(255,255,255,0.03);border:1px solid var(--border2);display:flex;align-items:center;gap:4px;}
+
+/* ── WELCOME ── */
+.welcome{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:72vh;text-align:center;gap:18px;}
+.wl-logo-img{width:90px;height:90px;border-radius:22px;overflow:hidden;
+  box-shadow:0 8px 28px rgba(201,168,76,0.3);animation:pulse 3s ease-in-out infinite;
+  border:2px solid var(--border);flex-shrink:0;}
+.wl-logo-img img{width:100%;height:100%;object-fit:cover;display:block;}
+@keyframes pulse{0%,100%{box-shadow:0 8px 28px rgba(201,168,76,0.28)}50%{box-shadow:0 8px 42px rgba(201,168,76,0.46)}}
+.wl-title{font-size:26px;font-weight:900;}.wl-title span{color:var(--gold);}
+.wl-sub{font-size:13px;color:var(--text2);max-width:380px;line-height:1.85;}
+
+/* DISCLAIMER */
+.wl-disclaimer{
+  max-width:520px;width:100%;
+  background:rgba(224,82,82,0.07);
+  border:1px solid rgba(224,82,82,0.22);
+  border-right:3px solid var(--red);
+  border-radius:12px;padding:14px 18px;
+  display:flex;align-items:flex-start;gap:12px;
+  text-align:right;
+}
+.wld-icon{font-size:18px;flex-shrink:0;margin-top:1px;}
+.wld-text{font-size:12px;color:var(--text2);line-height:1.85;}
+.wld-text strong{color:var(--text);}
+
+/* DEDICATION */
+.wl-dedication{
+  max-width:420px;width:100%;
+  background:linear-gradient(135deg,rgba(201,168,76,0.06),rgba(201,168,76,0.02));
+  border:1px solid var(--border);border-radius:16px;
+  padding:22px 24px;text-align:center;
+  position:relative;overflow:hidden;
+}
+.wl-dedication::before{content:'';position:absolute;top:0;right:0;left:0;height:2px;
+  background:linear-gradient(90deg,transparent,var(--gold),transparent);}
+.wld-stars{font-size:12px;color:var(--gold);opacity:0.5;letter-spacing:6px;}
+.wld-hadiya{font-size:11px;font-weight:700;color:var(--text3);letter-spacing:2px;
+  text-transform:uppercase;margin:8px 0 4px;}
+.wld-from{font-size:18px;font-weight:900;color:var(--gold);font-family:'Tajawal',sans-serif;
+  margin:6px 0 2px;line-height:1.4;}
+.wld-to{font-size:14px;color:var(--text2);margin:6px 0;}
+.wld-fatiha{font-size:16px;color:var(--text);font-weight:700;margin-top:8px;
+  padding:8px 20px;background:rgba(201,168,76,0.08);border-radius:20px;
+  display:inline-block;border:1px solid var(--border);}
+
+.wl-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;max-width:540px;width:100%;margin-top:4px;}
+.wlf{background:var(--card);border:1px solid var(--border2);border-radius:var(--r);padding:16px 12px;text-align:center;}
+.wlf .wi{font-size:24px;margin-bottom:7px;}.wlf .wt{font-size:12px;font-weight:700;color:var(--text);}
+.wlf .ws{font-size:10px;color:var(--text3);margin-top:3px;}
+
+/* ── EMP HEADER ── */
+.ehcard{background:var(--card2);border:1px solid var(--border);border-radius:18px;padding:24px;
+  display:flex;align-items:flex-start;gap:20px;margin-bottom:20px;position:relative;overflow:hidden;}
+.ehcard::before{content:'';position:absolute;top:0;right:0;left:0;height:2px;
+  background:linear-gradient(90deg,transparent,var(--gold),var(--teal),transparent);}
+.dav{width:70px;height:70px;border-radius:17px;display:flex;align-items:center;justify-content:center;
+  font-size:25px;font-weight:900;color:#fff;flex-shrink:0;font-family:'Tajawal',sans-serif;
+  box-shadow:0 5px 18px rgba(0,0,0,0.38);}
+.dname{font-size:21px;font-weight:900;color:var(--text);line-height:1.2;}
+.dsub{font-size:12px;color:var(--text2);margin-top:4px;}
+.dchips{display:flex;flex-wrap:wrap;gap:7px;margin-top:9px;}
+.chip{display:flex;align-items:center;gap:4px;background:var(--card);border:1px solid var(--border2);
+  border-radius:7px;padding:3px 9px;font-size:11px;color:var(--text2);}
+.chip strong{color:var(--text);}
+.shchip{padding:3px 10px;border-radius:20px;font-size:11px;font-weight:800;}
+.shm{background:rgba(240,168,48,0.13);color:var(--amber);border:1px solid rgba(240,168,48,0.28);}
+.shr{background:rgba(167,139,250,0.13);color:var(--purple);border:1px solid rgba(167,139,250,0.28);}
+.dacts{display:flex;gap:7px;flex-shrink:0;}
+
+/* ── TABS ── */
+.tw{border-bottom:1px solid var(--border2);margin-bottom:20px;display:flex;overflow-x:auto;}
+.tab{padding:9px 15px;font-size:12px;font-weight:700;color:var(--text3);cursor:pointer;
+  border-bottom:2px solid transparent;white-space:nowrap;transition:all 0.18s;
+  font-family:'Cairo',sans-serif;user-select:none;}
+.tab:hover:not(.active){color:var(--text);}
+.tab.active{color:var(--gold);border-bottom-color:var(--gold);}
+.tp{display:none;animation:fu 0.2s ease;}.tp.active{display:block;}
+@keyframes fu{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── INFO GRID ── */
+.ig{display:grid;grid-template-columns:repeat(auto-fill,minmax(195px,1fr));gap:11px;}
+.ib{background:var(--card);border:1px solid var(--border2);border-radius:var(--r);padding:14px;}
+.ib .il{font-size:9.5px;color:var(--text3);font-weight:700;letter-spacing:0.5px;margin-bottom:4px;}
+.ib .iv{font-size:14px;font-weight:800;color:var(--text);font-family:'Tajawal',sans-serif;}
+
+/* ── PROMO ── */
+.pcrd{background:var(--card);border:1px solid var(--border);border-radius:15px;padding:20px;margin-bottom:12px;}
+.ptop{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;}
+.ptitle{font-size:14px;font-weight:800;}
+.pgtrack{background:rgba(255,255,255,0.07);border-radius:7px;height:9px;overflow:hidden;margin:9px 0;}
+.pgbar{height:100%;border-radius:7px;background:linear-gradient(90deg,var(--teal),var(--gold));transition:width 0.7s;}
+.pmeta{display:flex;justify-content:space-between;font-size:10px;color:var(--text3);}
+.psteps{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:9px;margin-top:14px;}
+.pstep{background:rgba(255,255,255,0.025);border:1px solid var(--border2);border-radius:9px;
+  padding:11px;display:flex;align-items:center;gap:9px;}
+.psi{font-size:16px;}.pst .pt{font-size:11px;font-weight:700;color:var(--text);}
+.pst .ps{font-size:9.5px;color:var(--text3);margin-top:2px;}.psc{margin-right:auto;font-size:13px;}
+
+/* ── COURSES ── */
+.ch{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px;}
+.cflts{display:flex;gap:5px;flex-wrap:wrap;}
+.cfb{padding:4px 10px;border-radius:7px;font-size:10.5px;font-weight:700;cursor:pointer;
+  border:1px solid var(--border2);background:var(--card);color:var(--text3);
+  font-family:'Cairo',sans-serif;transition:all 0.14s;}
+.cfb:hover,.cfb.active{border-color:var(--gold);color:var(--gold);background:var(--gold3);}
+.ctbl{width:100%;border-collapse:collapse;}
+.ctbl th{text-align:right;padding:9px 10px;font-size:10px;color:var(--text3);font-weight:700;
+  border-bottom:1px solid var(--border2);letter-spacing:0.4px;}
+.ctbl td{padding:10px;font-size:11.5px;color:var(--text);border-bottom:1px solid rgba(255,255,255,0.028);vertical-align:middle;}
+.ctbl tr:hover td{background:rgba(255,255,255,0.018);}
+.ctbl td:first-child{font-weight:700;}
+.cs{display:inline-flex;align-items:center;gap:3px;padding:2px 8px;border-radius:18px;font-size:10px;font-weight:700;white-space:nowrap;}
+.cs-done{background:rgba(25,201,160,0.11);color:var(--teal);border:1px solid rgba(25,201,160,0.22);}
+.cs-need{background:rgba(224,82,82,0.11);color:var(--red);border:1px solid rgba(224,82,82,0.22);}
+.cs-prog{background:rgba(240,168,48,0.11);color:var(--amber);border:1px solid rgba(240,168,48,0.22);}
+.cs-plan{background:rgba(90,130,246,0.11);color:#7ab3f8;border:1px solid rgba(90,130,246,0.22);}
+.ct{display:inline-flex;align-items:center;gap:3px;padding:2px 6px;border-radius:5px;font-size:9.5px;font-weight:700;}
+.cton{background:rgba(25,201,160,0.07);color:var(--teal);}
+.ctnet{background:rgba(90,130,246,0.07);color:#7ab3f8;}
+
+/* ── OFFICIAL FILES ── */
+.fgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(225px,1fr));gap:12px;}
+.fcard{background:var(--card);border:1px solid var(--border2);border-radius:var(--r);padding:15px;transition:all 0.18s;}
+.fcard:hover{border-color:rgba(201,168,76,0.32);transform:translateY(-2px);box-shadow:var(--glow);}
+.fctop{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+.fico{font-size:25px;}.fcl{font-size:9.5px;font-weight:800;letter-spacing:0.8px;text-transform:uppercase;color:var(--gold);margin-bottom:2px;}
+.fnm{font-size:12.5px;font-weight:700;color:var(--text);}.fmt{font-size:10px;color:var(--text3);}
+.facts{display:flex;gap:5px;margin-top:10px;}
+.fab{flex:1;text-align:center;padding:5px;border-radius:6px;font-size:10.5px;font-weight:700;cursor:pointer;
+  border:1px solid var(--border2);background:var(--card2);color:var(--text2);font-family:'Cairo',sans-serif;transition:all 0.14s;}
+.fab:hover{border-color:var(--gold);color:var(--gold);}
+.fab.del:hover{border-color:var(--red);color:var(--red);}
+.fempty{grid-column:1/-1;text-align:center;padding:42px 18px;color:var(--text3);}
+.fempty .fi{font-size:34px;opacity:0.2;margin-bottom:9px;}
+.fctabs{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:14px;}
+.fct{padding:5px 13px;border-radius:9px;font-size:11px;font-weight:700;cursor:pointer;
+  border:1px solid var(--border2);background:var(--card);color:var(--text3);
+  font-family:'Cairo',sans-serif;transition:all 0.14s;display:flex;align-items:center;gap:5px;}
+.fct:hover,.fct.active{border-color:var(--gold);color:var(--gold);background:var(--gold3);}
+
+/* ── PERSONAL FILES ── */
+.pfgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:14px;}
+.pfcard{background:var(--card);border:1px solid var(--border2);border-radius:var(--r);
+  padding:18px;transition:all 0.2s;position:relative;overflow:hidden;}
+.pfcard::before{content:'';position:absolute;top:0;right:0;left:0;height:3px;
+  background:linear-gradient(90deg,var(--gold),transparent);opacity:0;transition:opacity 0.2s;}
+.pfcard:hover::before{opacity:1;}
+.pfcard.has{border-color:rgba(25,201,160,0.22);}
+.pfcard.has::before{background:linear-gradient(90deg,var(--teal),transparent);opacity:1;}
+.pftop{display:flex;align-items:center;gap:11px;margin-bottom:11px;}
+.pfic{width:42px;height:42px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:21px;flex-shrink:0;}
+.pftitle{font-size:13px;font-weight:800;color:var(--text);}
+.pfsub{font-size:10px;color:var(--text3);margin-top:2px;}
+.pfst{display:flex;align-items:center;gap:6px;margin-bottom:9px;}
+.pfdot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+.pfdot.ok{background:var(--teal);box-shadow:0 0 6px rgba(25,201,160,0.5);}
+.pfdot.miss{background:var(--red);box-shadow:0 0 6px rgba(224,82,82,0.4);}
+.pfstxt{font-size:11px;font-weight:700;}
+.pfacts{display:flex;gap:5px;flex-wrap:wrap;}
+.pfexp{font-size:10px;color:var(--text3);margin-top:6px;}
+.pfexp.ne{color:var(--amber);}.pfexp.ex{color:var(--red);}
+
+/* ── TIMELINE ── */
+.tl{padding-right:10px;}
+.tli{display:flex;gap:12px;margin-bottom:18px;position:relative;}
+.tli:not(:last-child)::after{content:'';position:absolute;right:-4px;top:18px;width:1px;
+  height:calc(100% + 2px);background:linear-gradient(to bottom,var(--border2),transparent);}
+.tld{width:9px;height:9px;border-radius:50%;flex-shrink:0;margin-top:11px;position:relative;z-index:1;}
+.tld-g{background:var(--gold);box-shadow:0 0 7px rgba(201,168,76,0.5);}
+.tld-t{background:var(--teal);box-shadow:0 0 7px rgba(25,201,160,0.5);}
+.tld-b{background:#5a88f8;box-shadow:0 0 7px rgba(90,136,248,0.5);}
+.tlb{flex:1;background:var(--card);border:1px solid var(--border2);border-radius:var(--r);padding:10px 13px;}
+.tlb .tt{font-size:12.5px;font-weight:700;color:var(--text);}
+.tlb .td{font-size:10px;color:var(--text3);margin-top:2px;}
+.tlb .tn{font-size:11.5px;color:var(--text2);margin-top:5px;line-height:1.6;}
+
+/* ── MODALS ── */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,0.74);z-index:500;
+  display:none;align-items:center;justify-content:center;backdrop-filter:blur(6px);padding:18px;}
+.overlay.open{display:flex;animation:fu 0.2s ease;}
+.modal{background:#0a1322;border:1px solid var(--border);border-radius:20px;padding:28px;
+  width:100%;max-width:570px;max-height:90vh;overflow-y:auto;box-shadow:0 22px 66px rgba(0,0,0,0.58);}
+.modal-sm{max-width:400px;}
+.mtitle{font-size:18px;font-weight:900;color:var(--text);margin-bottom:20px;}
+.mtitle span{color:var(--gold);}
+.fg{margin-bottom:14px;}
+.fg label{display:block;font-size:10.5px;color:var(--text3);margin-bottom:5px;font-weight:700;letter-spacing:0.3px;}
+.fg input,.fg select,.fg textarea{width:100%;background:rgba(255,255,255,0.047);border:1px solid var(--border2);
+  border-radius:9px;padding:8px 12px;color:var(--text);font-family:'Cairo',sans-serif;font-size:12.5px;
+  outline:none;transition:border-color 0.2s;direction:rtl;}
+.fg input:focus,.fg select:focus,.fg textarea:focus{border-color:var(--gold);}
+.fg select option{background:#0a1322;}
+.fg textarea{resize:vertical;min-height:66px;}
+.fgr{display:grid;grid-template-columns:1fr 1fr;gap:11px;}
+.macts{display:flex;gap:9px;justify-content:flex-end;margin-top:18px;padding-top:15px;border-top:1px solid var(--border2);}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:9px;
+  font-family:'Cairo',sans-serif;font-size:12.5px;font-weight:700;cursor:pointer;border:none;
+  transition:all 0.18s;white-space:nowrap;}
+.btng{background:linear-gradient(135deg,var(--gold),var(--gold2));color:var(--ink);box-shadow:0 3px 12px rgba(201,168,76,0.25);}
+.btng:hover{transform:translateY(-1px);box-shadow:0 5px 18px rgba(201,168,76,0.38);}
+.btno{background:transparent;color:var(--text2);border:1px solid var(--border2);}
+.btno:hover{color:var(--gold);border-color:var(--gold);}
+.btnr{background:rgba(224,82,82,0.1);color:var(--red);border:1px solid rgba(224,82,82,0.22);}
+.btnr:hover{background:rgba(224,82,82,0.18);}
+.btnt{background:rgba(25,201,160,0.1);color:var(--teal);border:1px solid rgba(25,201,160,0.22);}
+.btnt:hover{background:rgba(25,201,160,0.18);}
+.bsm{padding:5px 11px;font-size:11.5px;}
+
+/* BADGES */
+.sbg{padding:3px 9px;border-radius:18px;font-size:10.5px;font-weight:700;display:inline-block;}
+.sba{background:rgba(25,201,160,0.11);color:var(--teal);border:1px solid rgba(25,201,160,0.22);}
+.sbl{background:rgba(240,168,48,0.11);color:var(--amber);border:1px solid rgba(240,168,48,0.22);}
+.sbs{background:rgba(224,82,82,0.11);color:var(--red);border:1px solid rgba(224,82,82,0.22);}
+.pov{color:var(--red);}.pso{color:var(--amber);}.pok{color:var(--teal);}
+
+/* MISC */
+::-webkit-scrollbar{width:4px;height:4px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--blue);border-radius:3px;}
+.uzn{border:2px dashed var(--border2);border-radius:11px;padding:20px;text-align:center;
+  cursor:pointer;transition:all 0.2s;color:var(--text3);}
+.uzn:hover,.uzn.drag{border-color:var(--gold);color:var(--gold);background:var(--gold3);}
+.uzn .uzi{font-size:26px;margin-bottom:7px;}.uzn .uzt{font-size:12.5px;font-weight:700;}
+.uzn .uzs{font-size:10.5px;margin-top:3px;}.uzn input{display:none;}
+.ndot{width:6px;height:6px;border-radius:50%;background:var(--red);display:inline-block;
+  margin-left:4px;animation:blink 1.5s ease-in-out infinite;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0.25}}
+.es{text-align:center;padding:52px 20px;color:var(--text3);}
+.es .ei{font-size:42px;opacity:0.18;margin-bottom:12px;}
+.es .et{font-size:15px;font-weight:800;color:var(--text2);margin-bottom:5px;}
+.es .es2{font-size:12.5px;line-height:1.75;}
+.bkbtn{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:8px;cursor:pointer;
+  border:1px solid var(--border2);background:transparent;color:var(--text3);font-size:11.5px;
+  font-weight:700;font-family:'Cairo',sans-serif;transition:all 0.18s;margin-bottom:16px;}
+.bkbtn:hover{color:var(--gold);border-color:var(--gold);}
+.sh{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+@media(max-width:960px){.rsb{display:none;}}
+@media(max-width:680px){.lsb{display:none;}.fgr{grid-template-columns:1fr;}.content{padding:14px;}}
+</style>
+</head>
+<body>
+<div class="app">
+
+<!-- ══ LEFT SIDEBAR ══ -->
+<nav class="lsb">
+  <div class="lsb-head">
+    <div class="brand">
+      <div class="brand-logo"><img src="https://j.top4top.io/p_3733hr16m0.jpeg" alt="MDOC" onerror="this.style.display='none';this.parentElement.innerHTML='<span style=\'font-size:18px;font-weight:900;color:var(--gold);font-family:Tajawal,sans-serif\'>MD</span>'"></div>
+      <div><div class="bname">MDOC</div><div class="bsub">نظام ملفات الموظفين</div></div>
+    </div>
+  </div>
+  <div class="lsb-srch">
+    <div class="sbox">
+      <span style="color:var(--text3);font-size:13px">🔍</span>
+      <input type="text" placeholder="بحث بالاسم أو الرقم الوظيفي..." id="sbSearch" oninput="sbSrch(this.value)">
+    </div>
+  </div>
+  <div class="lsb-list" id="sbList">
+    <div class="lsb-empty"><div class="ei">👥</div>لا يوجد موظفون بعد.<br>اضغط إضافة موظف للبدء.</div>
+  </div>
+  <div class="lsb-foot">
+    <div class="st3">
+      <div class="stm"><div class="sv" id="ss1">0</div><div class="sl">موظف</div></div>
+      <div class="stm"><div class="sv" id="ss2">0</div><div class="sl">ترقية</div></div>
+      <div class="stm"><div class="sv" id="ss3">0</div><div class="sl">دورة</div></div>
+    </div>
+    <button class="addbtn" onclick="openEmpModal()">➕ إضافة موظف جديد</button>
+  </div>
+</nav>
+
+<!-- ══ MAIN ══ -->
+<main class="main">
+  <div class="topbar">
+    <div class="tb-title" id="topTitle">MDOC &mdash; <span>نظام إدارة ملفات الموظفين</span></div>
+    <div class="tb-badge"><span class="dot"></span><span id="topStatus">لا يوجد موظف محدد</span></div>
+  </div>
+  <div class="content">
+
+    <!-- WELCOME -->
+    <div class="welcome" id="welcomeScreen">
+      <div class="wl-logo-img">
+        <img src="https://j.top4top.io/p_3733hr16m0.jpeg" alt="MDOC"
+          onerror="this.parentElement.innerHTML='<div style=\'width:90px;height:90px;background:linear-gradient(135deg,var(--gold),var(--gold2));border-radius:22px;display:flex;align-items:center;justify-content:center;font-size:36px;font-weight:900;color:var(--ink);font-family:Tajawal,sans-serif;box-shadow:0 8px 28px rgba(201,168,76,0.28);animation:pulse 3s ease-in-out infinite\'>MD</div>'">
+      </div>
+      <div class="wl-title">مرحباً في <span>MDOC</span></div>
+      <div class="wl-sub">نظام إدارة ملفات الموظفين — أضف موظفك الأول من الشريط الجانبي للبدء</div>
+
+      <!-- DISCLAIMER -->
+      <div class="wl-disclaimer">
+        <div class="wld-icon">⚠️</div>
+        <div class="wld-text">
+          <strong>تنبيه:</strong> هذا الموقع <strong>غير رسمي</strong> ولا ينتمي لأي جهة حكومية أو مؤسسية.
+          صُنع بشكل شخصي بهدف مساعدة الزملاء في تنظيم ملفاتهم الوظيفية وتسهيل متابعة بياناتهم.
+          البيانات المُدخلة تُحفظ محلياً على جهازك فقط ولا تُرسل لأي جهة.
+        </div>
+      </div>
+
+      <!-- DEDICATION -->
+      <div class="wl-dedication">
+        <div class="wld-stars">✦ ✦ ✦</div>
+        <div class="wld-hadiya">إهداء</div>
+        <div class="wld-from">من وجبة C — حقل بدرة</div>
+        <div class="wld-to">على أرواح أمواتهم جميعاً</div>
+        <div class="wld-fatiha">الفاتحة 🤲</div>
+        <div class="wld-stars">✦ ✦ ✦</div>
+      </div>
+
+      <div class="wl-grid">
+        <div class="wlf"><div class="wi">📋</div><div class="wt">ملف شامل</div><div class="ws">بيانات التعيين والترقيات</div></div>
+        <div class="wlf"><div class="wi">📚</div><div class="wt">الدورات</div><div class="ws">مع المحاضر والأيام</div></div>
+        <div class="wlf"><div class="wi">📁</div><div class="wt">ملفات رسمية</div><div class="ws">كتب وأوامر وشهادات</div></div>
+        <div class="wlf"><div class="wi">🪪</div><div class="wt">ملفات شخصية</div><div class="ws">هويات وبطاقات ورواتب</div></div>
+        <div class="wlf"><div class="wi">🎯</div><div class="wt">متابعة الترقية</div><div class="ws">حساب تلقائي للاستحقاق</div></div>
+        <div class="wlf"><div class="wi">💾</div><div class="wt">حفظ دائم</div><div class="ws">البيانات لا تُحذف</div></div>
+      </div>
+    </div>
+
+    <!-- EMP DETAIL -->
+    <div style="display:none" id="empPanel">
+      <button class="bkbtn" onclick="goWelcome()">← العودة للقائمة</button>
+      <div id="empDetailContent"></div>
+    </div>
+
+  </div>
+</main>
+
+<!-- ══ RIGHT NAV SIDEBAR ══ -->
+<aside class="rsb">
+  <div class="rsb-head"><div class="rh">التنقل السريع</div></div>
+  <div class="rsb-nav" id="rsbNav">
+    <div class="ni active" onclick="rNav(this,'tp_info')"><span class="ico">📋</span> البيانات الأساسية</div>
+    <div class="ni" onclick="rNav(this,'tp_promo')"><span class="ico">🎯</span> متابعة الترقية</div>
+    <div class="ni" onclick="rNav(this,'tp_courses')"><span class="ico">📚</span> الدورات التدريبية</div>
+    <div class="ni" onclick="rNav(this,'tp_files')"><span class="ico">📁</span> الملفات الرسمية</div>
+    <div class="ni" onclick="rNav(this,'tp_personal')"><span class="ico">🪪</span> الملفات الشخصية</div>
+    <div class="ni" onclick="rNav(this,'tp_tl')"><span class="ico">📅</span> السجل الوظيفي</div>
+    <div class="rsb-sec">إجراءات سريعة</div>
+    <div class="ni" onclick="if(cId)openEmpModal(cId)"><span class="ico">✏️</span> تعديل الملف</div>
+    <div class="ni" onclick="if(cId)openCourseModal(cId)"><span class="ico">➕</span> إضافة دورة</div>
+    <div class="ni" onclick="if(cId)openFileModal(cId)"><span class="ico">📎</span> إضافة ملف رسمي</div>
+    <div class="ni" onclick="if(cId)openPFModal2(cId)"><span class="ico">🪪</span> إضافة ملف شخصي</div>
+  </div>
+  <div class="rsb-foot" id="rsbFoot" style="display:none">
+    <div class="rfi" id="rsbInfo"></div>
+  </div>
+</aside>
+
+</div>
+
+<!-- ══ MODALS ══ -->
+
+<!-- EMP -->
+<div class="overlay" id="empModal">
+  <div class="modal">
+    <div class="mtitle"><span id="empMT">➕ إضافة موظف جديد</span></div>
+    <div class="fgr">
+      <div class="fg"><label>الاسم الكامل *</label><input id="f_name" placeholder="اسم الموظف الرباعي"></div>
+      <div class="fg"><label>الرقم الوظيفي *</label><input id="f_id" placeholder="EMP-001"></div>
+    </div>
+    <div class="fgr">
+      <div class="fg"><label>المسمى الوظيفي</label><input id="f_title" placeholder="مهندس / محاسب / مدير..."></div>
+      <div class="fg"><label>الدرجة الوظيفية</label><input id="f_grade" placeholder="الدرجة الثالثة"></div>
+    </div>
+    <div class="fgr">
+      <div class="fg"><label>الدائرة / القسم</label><input id="f_dept" placeholder="قسم المالية"></div>
+      <div class="fg"><label>الفرع / الموقع</label><input id="f_branch" placeholder="بغداد - المركز"></div>
+    </div>
+    <div class="fgr">
+      <div class="fg"><label>📅 تاريخ التعيين</label><input type="date" id="f_hire"></div>
+      <div class="fg"><label>📅 تاريخ المباشرة</label><input type="date" id="f_start"></div>
+    </div>
+    <div class="fgr">
+      <div class="fg"><label>📅 تاريخ آخر ترقية</label><input type="date" id="f_lp"></div>
+      <div class="fg"><label>مدة استحقاق الترقية</label>
+        <select id="f_py"><option value="2">سنتان (2)</option><option value="3" selected>3 سنوات</option>
+          <option value="4">4 سنوات</option><option value="5">5 سنوات</option></select>
+      </div>
+    </div>
+    <div class="fgr">
+      <div class="fg"><label>نوع الدوام</label>
+        <select id="f_sh"><option value="morning">☀️ موظف صباحي</option><option value="rotation">🔄 موظف مناوب</option></select>
+      </div>
+      <div class="fg"><label>الحالة الوظيفية</label>
+        <select id="f_st"><option value="active">فعّال</option><option value="leave">إجازة</option><option value="suspended">موقوف</option></select>
+      </div>
+    </div>
+    <div class="fg"><label>الراتب الشهري (دينار)</label><input type="number" id="f_sal" placeholder="500000"></div>
+    <div class="fg"><label>ملاحظات</label><textarea id="f_nt" placeholder="أي ملاحظات إضافية..."></textarea></div>
+    <div class="macts">
+      <button class="btn btno" onclick="co('empModal')">إلغاء</button>
+      <button class="btn btng" onclick="saveEmp()">💾 حفظ الملف</button>
+    </div>
+  </div>
+</div>
+
+<!-- COURSE -->
+<div class="overlay" id="courseModal">
+  <div class="modal">
+    <div class="mtitle">📚 إضافة <span>دورة تدريبية</span></div>
+    <div class="fg"><label>اسم الدورة *</label><input id="c_nm" placeholder="عنوان الدورة"></div>
+    <div class="fgr">
+      <div class="fg"><label>الجهة المنظِّمة</label><input id="c_pr" placeholder="المعهد / الجهة"></div>
+      <div class="fg"><label>اسم المحاضر / المدرب</label><input id="c_lc" placeholder="اسم المحاضر"></div>
+    </div>
+    <div class="fgr">
+      <div class="fg"><label>نوع الدورة</label>
+        <select id="c_ty"><option value="onsite">🏛️ موقعية (حضوري)</option><option value="online">💻 إلكترونية (أونلاين)</option></select>
+      </div>
+      <div class="fg"><label>الحالة</label>
+        <select id="c_st"><option value="done">✅ مكتملة</option><option value="prog">🔄 جارية</option>
+          <option value="need">❌ مطلوبة</option><option value="plan">📅 مخططة</option></select>
+      </div>
+    </div>
+    <div class="fgr">
+      <div class="fg"><label>📅 تاريخ البدء</label><input type="date" id="c_dt"></div>
+      <div class="fg"><label>📅 تاريخ الانتهاء</label><input type="date" id="c_ed"></div>
+    </div>
+    <div class="fgr">
+      <div class="fg"><label>عدد الأيام</label><input type="number" id="c_dy" placeholder="14" min="1"></div>
+      <div class="fg"><label>عدد الساعات</label><input type="number" id="c_hr" placeholder="40" min="1"></div>
+    </div>
+    <div class="fg"><label>ملاحظات</label><textarea id="c_no" placeholder="ملاحظات الدورة..."></textarea></div>
+    <input type="hidden" id="c_ei">
+    <div class="macts">
+      <button class="btn btno" onclick="co('courseModal')">إلغاء</button>
+      <button class="btn btng" onclick="saveCourse()">💾 حفظ الدورة</button>
+    </div>
+  </div>
+</div>
+
+<!-- OFFICIAL FILE -->
+<div class="overlay" id="fileModal">
+  <div class="modal">
+    <div class="mtitle">📁 إضافة <span>ملف رسمي</span></div>
+    <div class="fg"><label>اسم الوثيقة *</label><input id="fi_nm" placeholder="عنوان الوثيقة"></div>
+    <div class="fgr">
+      <div class="fg"><label>فئة الملف *</label>
+        <select id="fi_cat">
+          <option value="official">📄 كتاب رسمي</option><option value="thanks">🏅 كتاب شكر وتقدير</option>
+          <option value="order">📋 أمر إداري / قرار</option><option value="certificate">🎓 شهادة / وثيقة</option>
+          <option value="complaint">⚠️ شكوى / مخالفة</option><option value="other">📎 وثيقة أخرى</option>
+        </select>
+      </div>
+      <div class="fg"><label>📅 تاريخ الوثيقة</label><input type="date" id="fi_dt"></div>
+    </div>
+    <div class="fg"><label>رقم الكتاب / الأمر</label><input id="fi_rf" placeholder="رقم مرجعي"></div>
+    <div class="fg"><label>ملاحظات</label><textarea id="fi_nt" placeholder="ملخص الوثيقة..."></textarea></div>
+    <div class="fg">
+      <label>إرفاق ملف (PDF / صورة)</label>
+      <div class="uzn" id="uzOf" onclick="document.getElementById('fi_fl').click()"
+        ondragover="event.preventDefault();this.classList.add('drag')" ondragleave="this.classList.remove('drag')" ondrop="hdrop(event,'fi')">
+        <input type="file" id="fi_fl" accept=".pdf,image/*" onchange="hsel(event,'fi')">
+        <div class="uzi">☁️</div><div class="uzt" id="fi_ut">اسحب أو اضغط للاختيار</div>
+        <div class="uzs">PDF أو صورة — حجم أقصى 5MB</div>
+      </div>
+    </div>
+    <input type="hidden" id="fi_ei">
+    <div class="macts">
+      <button class="btn btno" onclick="co('fileModal')">إلغاء</button>
+      <button class="btn btng" onclick="saveOF()">💾 حفظ الملف</button>
+    </div>
+  </div>
+</div>
+
+<!-- PERSONAL FILE -->
+<div class="overlay" id="pfModal">
+  <div class="modal">
+    <div class="mtitle">🪪 إضافة / تحديث <span>ملف شخصي</span></div>
+    <div class="fg"><label>نوع الملف الشخصي *</label>
+      <select id="pf_ty">
+        <option value="natid">🪪 البطاقة الوطنية</option>
+        <option value="deptid">🏢 هوية الدائرة</option>
+        <option value="rescard">🏠 بطاقة السكن</option>
+        <option value="salary">💰 شريط الراتب</option>
+        <option value="passport">🛂 جواز السفر</option>
+        <option value="other">📎 وثيقة شخصية أخرى</option>
+      </select>
+    </div>
+    <div class="fg"><label>ملاحظة / وصف</label><input id="pf_no" placeholder="مثال: صادر 2022 - مركز بغداد"></div>
+    <div class="fgr">
+      <div class="fg"><label>📅 تاريخ الإصدار</label><input type="date" id="pf_is"></div>
+      <div class="fg"><label>📅 تاريخ الانتهاء</label><input type="date" id="pf_ex"></div>
+    </div>
+    <div class="fg">
+      <label>رفع صورة / نسخة الوثيقة</label>
+      <div class="uzn" id="uzPf" onclick="document.getElementById('pf_fl').click()"
+        ondragover="event.preventDefault();this.classList.add('drag')" ondragleave="this.classList.remove('drag')" ondrop="hdrop(event,'pf')">
+        <input type="file" id="pf_fl" accept=".pdf,image/*" onchange="hsel(event,'pf')">
+        <div class="uzi">📄</div><div class="uzt" id="pf_ut">اسحب أو اضغط للاختيار</div>
+        <div class="uzs">PDF أو صورة — حجم أقصى 5MB</div>
+      </div>
+    </div>
+    <input type="hidden" id="pf_ei">
+    <div class="macts">
+      <button class="btn btno" onclick="co('pfModal')">إلغاء</button>
+      <button class="btn btng" onclick="savePF()">💾 حفظ</button>
+    </div>
+  </div>
+</div>
+
+<!-- CONFIRM -->
+<div class="overlay" id="confirmModal">
+  <div class="modal modal-sm">
+    <div class="mtitle" style="color:var(--red)">⚠️ تأكيد الحذف</div>
+    <p style="font-size:13.5px;color:var(--text2);line-height:1.85;" id="confirmTxt">هل أنت متأكد؟</p>
+    <div class="macts">
+      <button class="btn btno" onclick="co('confirmModal')">إلغاء</button>
+      <button class="btn btnr" id="confirmOk">تأكيد الحذف</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ════════════════════════════════════════
+   DATABASE
+════════════════════════════════════════ */
+const DB={
+  g(k){try{return JSON.parse(localStorage.getItem('mdoc_'+k)||'null');}catch{return null;}},
+  s(k,v){try{localStorage.setItem('mdoc_'+k,JSON.stringify(v));}catch{}},
+  emps(){return this.g('emps')||[];},courses(){return this.g('courses')||[];},
+  files(){return this.g('files')||[];},personal(){return this.g('personal')||[];},
+  saveEmps(d){this.s('emps',d);},saveCourses(d){this.s('courses',d);},
+  saveFiles(d){this.s('files',d);},savePersonal(d){this.s('personal',d);},
+};
+
+/* ════════════════════════════════════════
+   UTILS
+════════════════════════════════════════ */
+const today=new Date();
+const clrs=['#1a3560','#6b21a8','#0f766e','#b45309','#9d174d','#1e40af','#065f46','#7c2d12'];
+const gc=n=>clrs[(n||'?').charCodeAt(0)%clrs.length];
+const gi=n=>(n||'?').split(' ').slice(0,2).map(w=>w[0]).join('').toUpperCase();
+const fd=d=>d?new Date(d).toLocaleDateString('ar-IQ',{year:'numeric',month:'long',day:'numeric'}):'—';
+const fds=d=>d?new Date(d).toLocaleDateString('ar-IQ'):'—';
+const addY=(d,y)=>{let n=new Date(d);n.setFullYear(n.getFullYear()+parseInt(y));return n;};
+const dDiff=(a,b)=>Math.floor((b-a)/86400000);
+const getPD=e=>{const b=e.lp||e.start||e.hire;return b?addY(b,e.py||3):null;};
+const getDL=e=>{const p=getPD(e);return p?dDiff(today,p):null;};
+
+const catI={official:{icon:'📄',label:'كتاب رسمي',color:'#7ab3f8'},thanks:{icon:'🏅',label:'شكر وتقدير',color:'#e8c96a'},
+  order:{icon:'📋',label:'أمر إداري',color:'#a78bfa'},certificate:{icon:'🎓',label:'شهادة',color:'#34d399'},
+  complaint:{icon:'⚠️',label:'شكوى',color:'#f87171'},other:{icon:'📎',label:'أخرى',color:'#94a3b8'}};
+const pfT={natid:{icon:'🪪',label:'البطاقة الوطنية',bg:'rgba(90,130,246,0.1)',color:'#7ab3f8'},
+  deptid:{icon:'🏢',label:'هوية الدائرة',bg:'rgba(201,168,76,0.1)',color:'#e8c96a'},
+  rescard:{icon:'🏠',label:'بطاقة السكن',bg:'rgba(52,211,153,0.1)',color:'#34d399'},
+  salary:{icon:'💰',label:'شريط الراتب',bg:'rgba(240,168,48,0.1)',color:'#f0a830'},
+  passport:{icon:'🛂',label:'جواز السفر',bg:'rgba(167,139,250,0.1)',color:'#a78bfa'},
+  other:{icon:'📎',label:'وثيقة شخصية',bg:'rgba(148,163,184,0.1)',color:'#94a3b8'}};
+const stI={done:{cls:'cs-done',lbl:'✅ مكتملة'},prog:{cls:'cs-prog',lbl:'🔄 جارية'},
+  need:{cls:'cs-need',lbl:'❌ مطلوبة'},plan:{cls:'cs-plan',lbl:'📅 مخططة'}};
+const empStI={active:{cls:'sba',lbl:'فعّال'},leave:{cls:'sbl',lbl:'إجازة'},suspended:{cls:'sbs',lbl:'موقوف'}};
+
+/* ════════════════════════════════════════
+   STATE
+════════════════════════════════════════ */
+let cId=null,edId=null,fiB64=null,fiNm=null,pfB64=null,pfNm=null;
+
+/* ════════════════════════════════════════
+   SIDEBAR
+════════════════════════════════════════ */
+function rSB(f=''){
+  const emps=DB.emps().filter(e=>!f||e.name.includes(f)||(e.id||'').toLowerCase().includes(f.toLowerCase())||(e.dept||'').includes(f));
+  document.getElementById('ss1').textContent=DB.emps().length;
+  document.getElementById('ss2').textContent=DB.emps().filter(e=>{const d=getDL(e);return d!==null&&d<=30;}).length;
+  document.getElementById('ss3').textContent=DB.courses().filter(c=>c.status==='done').length;
+  const el=document.getElementById('sbList');
+  if(!emps.length){el.innerHTML=`<div class="lsb-empty"><div class="ei">👥</div>${f?'لا نتائج مطابقة':'لا يوجد موظفون.<br>اضغط إضافة موظف للبدء.'}</div>`;return;}
+  const shM={morning:{cls:'sm',lbl:'صباحي'},rotation:{cls:'sr',lbl:'مناوب'}};
+  el.innerHTML=emps.map(e=>{
+    const d=getDL(e);const dot=d!==null&&d<=0?'<span class="ndot"></span>':'';
+    const sh=shM[e.shift]||shM.morning;
+    return `<div class="erow ${e.id===cId?'active':''}" onclick="openEmp('${e.id}')">
+      <div class="eav" style="background:${gc(e.name)}">${gi(e.name)}</div>
+      <div><div class="ern">${dot}${e.name}</div><div class="eri">${e.id||'—'} · ${e.dept||'—'}</div>
+      <span class="shift-tag ${sh.cls}">${sh.lbl}</span></div>
+    </div>`;
+  }).join('');
+}
+function sbSrch(v){rSB(v.trim());}
+
+/* ════════════════════════════════════════
+   NAVIGATION
+════════════════════════════════════════ */
+function goWelcome(){
+  cId=null;
+  document.getElementById('welcomeScreen').style.display='';
+  document.getElementById('empPanel').style.display='none';
+  document.getElementById('topTitle').innerHTML='MDOC &mdash; <span>نظام إدارة ملفات الموظفين</span>';
+  document.getElementById('topStatus').textContent='لا يوجد موظف محدد';
+  document.getElementById('rsbFoot').style.display='none';
+  rSB();
+}
+function openEmp(id){cId=id;document.getElementById('welcomeScreen').style.display='none';
+  document.getElementById('empPanel').style.display='block';rDetail(id);rSB();updRSBFoot(id);}
+
+function rNav(el,pane){
+  document.querySelectorAll('.rsb .ni').forEach(n=>n.classList.remove('active'));
+  el.classList.add('active');
+  document.querySelectorAll('.tp').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  const p=document.getElementById(pane);if(p)p.classList.add('active');
+  document.querySelectorAll('.tab').forEach(t=>{if(t.getAttribute('data-p')===pane)t.classList.add('active');});
+}
+function sTab(el,id){
+  el.closest('.tw').querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));el.classList.add('active');
+  document.querySelectorAll('.tp').forEach(p=>p.classList.remove('active'));document.getElementById(id).classList.add('active');
+  document.querySelectorAll('.rsb .ni').forEach(n=>{const f=n.getAttribute('onclick')||'';
+    if(f.includes("'"+id+"'"))n.classList.add('active');else n.classList.remove('active');});
+}
+function updRSBFoot(id){
+  const e=DB.emps().find(x=>x.id===id);
+  if(!e){document.getElementById('rsbFoot').style.display='none';return;}
+  const d=getDL(e);const pc=d===null?'pok':d<=0?'pov':d<=30?'pso':'pok';
+  const pl=d===null?'غير محدد':d<=0?`متأخر ${Math.abs(d)} يوم`:`بعد ${d} يوم`;
+  document.getElementById('rsbFoot').style.display='block';
+  document.getElementById('rsbInfo').innerHTML=`<div class="rfn">${e.name}</div><div class="rfi2">${e.id||'—'} · ${e.grade||'—'}</div>
+    <div class="rfp ${pc}"><span>🎯</span><span>${pl}</span></div>`;
+}
+
+/* ════════════════════════════════════════
+   RENDER DETAIL
+════════════════════════════════════════ */
+function rDetail(id){
+  const e=DB.emps().find(x=>x.id===id);if(!e){goWelcome();return;}
+  const d=getDL(e),pd=getPD(e),si=empStI[e.status]||empStI.active;
+  const hD=e.hire?new Date(e.hire):null;
+  const sYrs=hD?((today-hD)/(365.25*24*3600*1000)).toFixed(1):'—';
+  const lD=e.lp||e.start||e.hire?new Date(e.lp||e.start||e.hire):null;
+  let prog=0;if(lD&&pd)prog=Math.min(100,Math.max(0,(today-lD)/(pd-lD)*100));
+  const pc=d===null?'pok':d<=0?'pov':d<=30?'pso':'pok';
+  const pl=d===null?'غير محدد':d<=0?`متأخر ${Math.abs(d)} يوم`:`بعد ${d} يوم`;
+  const shM={morning:{cls:'shm',lbl:'☀️ موظف صباحي'},rotation:{cls:'shr',lbl:'🔄 موظف مناوب'}};
+  const sh=shM[e.shift]||shM.morning;
+  const eC=DB.courses().filter(c=>c.empId===id);
+  const eF=DB.files().filter(f=>f.empId===id);
+  const ePF=DB.personal().filter(p=>p.empId===id);
+  document.getElementById('topTitle').innerHTML=`ملف <span>${e.name}</span>`;
+  document.getElementById('topStatus').textContent=`${e.id||''} · ${e.dept||''}`;
+
+  document.getElementById('empDetailContent').innerHTML=`
+  <div class="ehcard">
+    <div class="dav" style="background:${gc(e.name)}">${gi(e.name)}</div>
+    <div style="flex:1">
+      <div class="dname">${e.name}</div><div class="dsub">${e.title||'—'} · ${e.grade||'—'}</div>
+      <div class="dchips">
+        <span class="sbg ${si.cls}">${si.lbl}</span>
+        <span class="shchip ${sh.cls}">${sh.lbl}</span>
+        <span class="chip">🏢 <strong>${e.dept||'—'}</strong></span>
+        <span class="chip">📍 <strong>${e.branch||'—'}</strong></span>
+        <span class="chip">🪪 <strong>${e.id||'—'}</strong></span>
+        <span class="chip">⏱ <strong>${sYrs} سنة</strong></span>
+        <span class="chip ${pc}">🎯 <strong>${pl}</strong></span>
+      </div>
+    </div>
+    <div class="dacts">
+      <button class="btn btng bsm" onclick="openEmpModal('${e.id}')">✏️ تعديل</button>
+      <button class="btn btnr bsm" onclick="cDel('emp','${e.id}')">🗑</button>
+    </div>
+  </div>
+
+  <div class="tw">
+    <div class="tab active" data-p="tp_info" onclick="sTab(this,'tp_info')">📋 البيانات</div>
+    <div class="tab" data-p="tp_promo" onclick="sTab(this,'tp_promo')">🎯 الترقية</div>
+    <div class="tab" data-p="tp_courses" onclick="sTab(this,'tp_courses')">📚 الدورات <span style="font-size:10px;background:var(--card);border-radius:8px;padding:1px 5px;margin-right:2px">${eC.length}</span></div>
+    <div class="tab" data-p="tp_files" onclick="sTab(this,'tp_files')">📁 الملفات الرسمية <span style="font-size:10px;background:var(--card);border-radius:8px;padding:1px 5px;margin-right:2px">${eF.length}</span></div>
+    <div class="tab" data-p="tp_personal" onclick="sTab(this,'tp_personal')">🪪 الملفات الشخصية <span style="font-size:10px;background:var(--card);border-radius:8px;padding:1px 5px;margin-right:2px">${ePF.length}</span></div>
+    <div class="tab" data-p="tp_tl" onclick="sTab(this,'tp_tl')">📅 السجل</div>
+  </div>
+
+  <div class="tp active" id="tp_info">
+    <div class="ig">
+      <div class="ib"><div class="il">المسمى الوظيفي</div><div class="iv">${e.title||'—'}</div></div>
+      <div class="ib"><div class="il">الدرجة الوظيفية</div><div class="iv">${e.grade||'—'}</div></div>
+      <div class="ib"><div class="il">تاريخ التعيين</div><div class="iv" style="font-size:12px">${fd(e.hire)}</div></div>
+      <div class="ib"><div class="il">تاريخ المباشرة</div><div class="iv" style="font-size:12px">${fd(e.start)}</div></div>
+      <div class="ib"><div class="il">الدائرة / القسم</div><div class="iv">${e.dept||'—'}</div></div>
+      <div class="ib"><div class="il">الفرع / الموقع</div><div class="iv">${e.branch||'—'}</div></div>
+      <div class="ib"><div class="il">الراتب الشهري</div><div class="iv">${e.salary?Number(e.salary).toLocaleString('ar-IQ')+' د.ع':'—'}</div></div>
+      <div class="ib"><div class="il">سنوات الخدمة</div><div class="iv" style="color:var(--teal)">${sYrs} سنة</div></div>
+      <div class="ib"><div class="il">نوع الدوام</div><div class="iv">${sh.lbl}</div></div>
+      ${e.notes?`<div class="ib" style="grid-column:1/-1"><div class="il">ملاحظات</div><div class="iv" style="font-size:12px;font-weight:500;color:var(--text2)">${e.notes}</div></div>`:''}
+    </div>
+  </div>
+
+  <div class="tp" id="tp_promo">
+    <div class="pcrd">
+      <div class="ptop"><div class="ptitle">مسار الاستحقاق الوظيفي</div>
+        <span class="sbg ${d!==null&&d<=0?'sbs':d!==null&&d<=30?'sbl':'sba'}">${pl}</span>
+      </div>
+      <div class="pmeta"><span>آخر ترقية: ${fd(e.lp)}</span><span>الترقية القادمة: ${pd?fd(pd):'—'}</span></div>
+      <div class="pgtrack"><div class="pgbar" style="width:${prog.toFixed(1)}%"></div></div>
+      <div style="text-align:center;font-size:10px;color:var(--text3)">${prog.toFixed(0)}% — مدة الاستحقاق ${e.py||3} سنوات</div>
+      <div class="psteps">
+        <div class="pstep"><span class="psi">📋</span><div class="pst"><div class="pt">تاريخ التعيين</div><div class="ps">${fds(e.hire)}</div></div><span class="psc">${e.hire?'✅':'—'}</span></div>
+        <div class="pstep"><span class="psi">🚀</span><div class="pst"><div class="pt">تاريخ المباشرة</div><div class="ps">${fds(e.start)}</div></div><span class="psc">${e.start?'✅':'—'}</span></div>
+        <div class="pstep"><span class="psi">🏆</span><div class="pst"><div class="pt">آخر ترقية</div><div class="ps">${fds(e.lp)}</div></div><span class="psc">${e.lp?'✅':'—'}</span></div>
+        <div class="pstep"><span class="psi">🎯</span><div class="pst"><div class="pt">الترقية المستحقة</div><div class="ps">${pd?fds(pd):'—'}</div></div><span class="psc ${pc}">${d!==null&&d<=0?'🔴':'⏳'}</span></div>
+        <div class="pstep"><span class="psi">📚</span><div class="pst"><div class="pt">دورات معلقة</div><div class="ps">${eC.filter(c=>c.status==='need').length} دورة</div></div><span class="psc">${eC.filter(c=>c.status==='need').length===0?'✅':'🔴'}</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="tp" id="tp_courses">
+    <div class="ch">
+      <div class="cflts">
+        <div class="cfb active" onclick="fCT(this,'all')">الكل (${eC.length})</div>
+        <div class="cfb" onclick="fCT(this,'done')">✅ مكتملة (${eC.filter(c=>c.status==='done').length})</div>
+        <div class="cfb" onclick="fCT(this,'need')">❌ مطلوبة (${eC.filter(c=>c.status==='need').length})</div>
+        <div class="cfb" onclick="fCT(this,'prog')">🔄 جارية (${eC.filter(c=>c.status==='prog').length})</div>
+      </div>
+      <button class="btn btng bsm" onclick="openCourseModal('${id}')">➕ إضافة دورة</button>
+    </div>
+    ${eC.length?`<div style="overflow-x:auto"><table class="ctbl" id="ctBody">
+      <thead><tr><th>الدورة</th><th>المحاضر</th><th>الجهة</th><th>النوع</th><th>الأيام</th><th>الساعات</th><th>التاريخ</th><th>الحالة</th><th></th></tr></thead>
+      <tbody>${bCRows(eC)}</tbody></table></div>`
+    :`<div class="es"><div class="ei">📚</div><div class="et">لا توجد دورات</div><div class="es2">اضغط إضافة دورة للبدء</div></div>`}
+  </div>
+
+  <div class="tp" id="tp_files">
+    <div class="fctabs" id="fCatTabs">
+      <div class="fct active" onclick="fOF(this,'all')">📂 الكل (${eF.length})</div>
+      <div class="fct" onclick="fOF(this,'official')">📄 رسمية (${eF.filter(f=>f.cat==='official').length})</div>
+      <div class="fct" onclick="fOF(this,'thanks')">🏅 شكر (${eF.filter(f=>f.cat==='thanks').length})</div>
+      <div class="fct" onclick="fOF(this,'order')">📋 أوامر (${eF.filter(f=>f.cat==='order').length})</div>
+      <div class="fct" onclick="fOF(this,'certificate')">🎓 شهادات (${eF.filter(f=>f.cat==='certificate').length})</div>
+      <div class="fct" onclick="fOF(this,'complaint')">⚠️ شكاوى (${eF.filter(f=>f.cat==='complaint').length})</div>
+    </div>
+    <div class="sh"><div></div><button class="btn btng bsm" onclick="openFileModal('${id}')">➕ إضافة ملف</button></div>
+    <div class="fgrid" id="fGrid">${bFCards(eF)}</div>
+  </div>
+
+  <div class="tp" id="tp_personal">
+    <div class="sh">
+      <div style="font-size:14px;font-weight:800;color:var(--text)">🪪 الملفات الشخصية للموظف</div>
+      <button class="btn btng bsm" onclick="openPFModal2('${id}')">➕ إضافة ملف شخصي</button>
+    </div>
+    <div class="pfgrid" id="pfGrid">${bPFCards(ePF,id)}</div>
+  </div>
+
+  <div class="tp" id="tp_tl">
+    <div class="tl">${bTL(e,eC)}</div>
+  </div>`;
+}
+
+/* ════════════════════════════════════════
+   BUILD HELPERS
+════════════════════════════════════════ */
+function bCRows(list,f='all'){
+  const rows=f==='all'?list:list.filter(c=>c.status===f);
+  if(!rows.length)return`<tr><td colspan="9" style="text-align:center;padding:26px;color:var(--text3)">لا توجد دورات في هذه الفئة</td></tr>`;
+  return rows.map(c=>{
+    const si=stI[c.status]||stI.done;
+    const tH=c.type==='online'?'<span class="ct ctnet">💻 إلكترونية</span>':'<span class="ct cton">🏛️ موقعية</span>';
+    const dn=parseInt(c.days)||0;
+    const dl=dn>0?(dn>=14?Math.floor(dn/7)+' أسابيع'+(dn%7?' و'+dn%7+' أيام':''):dn+' أيام'):'—';
+    return`<tr><td>${c.name}</td><td style="color:var(--text2)">${c.lecturer||'—'}</td>
+      <td style="color:var(--text2)">${c.provider||'—'}</td><td>${tH}</td>
+      <td style="color:var(--gold)">${dl}</td><td style="color:var(--text2)">${c.hours?c.hours+'س':'—'}</td>
+      <td style="color:var(--text3)">${c.date?fds(c.date):'—'}</td>
+      <td><span class="cs ${si.cls}">${si.lbl}</span></td>
+      <td><button class="btn btnr bsm" style="padding:3px 7px" onclick="cDel('course','${c.id}')">🗑</button></td>
+    </tr>`;
+  }).join('');
+}
+function fCT(el,f){el.closest('.ch').querySelectorAll('.cfb').forEach(b=>b.classList.remove('active'));el.classList.add('active');
+  const tb=document.querySelector('#ctBody tbody');if(tb)tb.innerHTML=bCRows(DB.courses().filter(c=>c.empId===cId),f);}
+
+function bFCards(files,cat='all'){
+  const list=cat==='all'?files:files.filter(f=>f.cat===cat);
+  if(!list.length)return`<div class="fempty"><div class="fi">📭</div><p>لا توجد وثائق في هذه الفئة</p></div>`;
+  return list.map(f=>{const ci=catI[f.cat]||catI.other;
+    return`<div class="fcard"><div class="fctop"><div class="fico">${ci.icon}</div>
+      <div><div class="fcl" style="color:${ci.color}">${ci.label}</div>
+      <div class="fnm">${f.name}</div><div class="fmt">${f.ref?'#'+f.ref+' · ':''}${fds(f.date)}</div></div></div>
+      ${f.notes?`<div style="font-size:10px;color:var(--text3);line-height:1.6;margin-bottom:8px">${f.notes}</div>`:''}
+      <div class="facts">
+        ${f.fileData?`<div class="fab" onclick="vF('${f.id}','files')">👁 عرض</div><div class="fab" onclick="dF('${f.id}','files')">⬇️</div>`:`<div class="fab" style="opacity:0.35;cursor:default">لا يوجد مرفق</div>`}
+        <div class="fab del" onclick="cDel('file','${f.id}')">🗑</div>
+      </div></div>`;}).join('');
+}
+function fOF(el,cat){document.querySelectorAll('#fCatTabs .fct').forEach(t=>t.classList.remove('active'));el.classList.add('active');
+  document.getElementById('fGrid').innerHTML=bFCards(DB.files().filter(f=>f.empId===cId),cat);}
+
+function bPFCards(recs,empId){
+  const types=['natid','deptid','rescard','salary','passport','other'];
+  return types.map(type=>{
+    const rec=recs.find(r=>r.type===type);const ti=pfT[type];
+    const hasF=rec&&rec.fileData;
+    const exp=rec&&rec.expiry?new Date(rec.expiry):null;
+    const expD=exp?dDiff(today,exp):null;
+    let expL='',expC='';
+    if(exp){if(expD<0){expL=`⛔ منتهية منذ ${Math.abs(expD)} يوم`;expC='ex';}
+      else if(expD<=60){expL=`⚠️ تنتهي خلال ${expD} يوم`;expC='ne';}
+      else expL=`✅ صالحة حتى ${fds(rec.expiry)}`;}
+    return`<div class="pfcard ${hasF?'has':''}">
+      <div class="pftop"><div class="pfic" style="background:${ti.bg}">${ti.icon}</div>
+        <div><div class="pftitle">${ti.label}</div>
+        <div class="pfsub">${rec&&rec.note?rec.note:(hasF?'تم الرفع':'لم يُرفع بعد')}</div></div>
+      </div>
+      <div class="pfst"><div class="pfdot ${hasF?'ok':'miss'}"></div>
+        <div class="pfstxt" style="color:${hasF?'var(--teal)':'var(--red)'}">${hasF?'✅ متوفر':'❌ غير متوفر'}</div>
+      </div>
+      ${expL?`<div class="pfexp ${expC}">${expL}</div>`:''}
+      ${rec&&rec.issued?`<div style="font-size:10px;color:var(--text3);margin-bottom:6px">📅 إصدار: ${fds(rec.issued)}</div>`:''}
+      <div class="pfacts">
+        ${hasF?`<button class="btn btnt bsm" style="flex:1" onclick="vF('${rec.id}','personal')">👁 عرض</button>
+                <button class="btn btno bsm" onclick="dF('${rec.id}','personal')">⬇️</button>`:''}
+        <button class="btn btng bsm" style="${hasF?'':'flex:1'}" onclick="openPFModalT('${empId}','${type}')">
+          ${hasF?'🔄 تحديث':'📤 رفع الملف'}
+        </button>
+        ${rec?`<button class="btn btnr bsm" onclick="cDel('personal','${rec.id}')">🗑</button>`:''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function bTL(e,courses){
+  const items=[];
+  if(e.hire)items.push({date:e.hire,type:'tld-t',title:'📋 أمر التعيين',desc:`تعيين بوظيفة ${e.title||''} في ${e.dept||''}`});
+  if(e.start)items.push({date:e.start,type:'tld-b',title:'🚀 المباشرة بالعمل',desc:`بدأ العمل في ${e.branch||''}`});
+  if(e.lp)items.push({date:e.lp,type:'tld-g',title:`🏆 آخر ترقية — ${e.grade||''}`,desc:'صدر قرار الترقية'});
+  courses.filter(c=>c.status==='done'&&c.date).sort((a,b)=>new Date(a.date)-new Date(b.date)).forEach(c=>{
+    items.push({date:c.date,type:'tld-b',title:`📚 ${c.name}`,desc:`${c.provider||''} ${c.lecturer?'· '+c.lecturer:''} — ${c.days?c.days+' يوم':''} ${c.hours?'/ '+c.hours+' ساعة':''}`});
+  });
+  const pd=getPD(e);if(pd)items.push({date:pd.toISOString().split('T')[0],type:'tld-g',title:'🎯 الترقية المستحقة القادمة',desc:getDL(e)&&getDL(e)<=0?'⚠️ متأخرة':'مخططة',dashed:true});
+  items.sort((a,b)=>new Date(a.date)-new Date(b.date));
+  if(!items.length)return'<div class="es"><div class="ei">📅</div><div class="et">لا يوجد سجل بعد</div></div>';
+  return items.map(i=>`<div class="tli"><div class="tld ${i.type}"></div>
+    <div class="tlb" ${i.dashed?'style="border-style:dashed;opacity:0.72"':''}>
+      <div class="tt">${i.title}</div><div class="td">${fd(i.date)}</div>
+      ${i.desc?`<div class="tn">${i.desc}</div>`:''}
+    </div></div>`).join('');
+}
+
+/* ════════════════════════════════════════
+   FILE VIEW/DOWNLOAD
+════════════════════════════════════════ */
+function vF(fid,store){
+  const f=(store==='files'?DB.files():DB.personal()).find(x=>x.id===fid);
+  if(!f||!f.fileData)return;
+  const w=window.open();
+  w.document.write(`<html><body style="margin:0;background:#111">
+    ${f.fileData.startsWith('data:image')?`<img src="${f.fileData}" style="max-width:100%;display:block;margin:auto">`:
+    `<embed src="${f.fileData}" type="application/pdf" width="100%" height="100%">`}
+  </body></html>`);
+}
+function dF(fid,store){
+  const f=(store==='files'?DB.files():DB.personal()).find(x=>x.id===fid);
+  if(!f||!f.fileData)return;
+  const a=document.createElement('a');a.href=f.fileData;a.download=f.fileName||f.name||'doc';a.click();
+}
+
+/* ════════════════════════════════════════
+   EMP CRUD
+════════════════════════════════════════ */
+function openEmpModal(id=null){
+  edId=id;document.getElementById('empMT').textContent=id?'✏️ تعديل بيانات الموظف':'➕ إضافة موظف جديد';
+  ['f_name','f_id','f_grade','f_title','f_dept','f_branch','f_hire','f_start','f_lp','f_sal','f_nt'].forEach(x=>document.getElementById(x).value='');
+  document.getElementById('f_py').value='3';document.getElementById('f_st').value='active';document.getElementById('f_sh').value='morning';
+  if(id){const e=DB.emps().find(x=>x.id===id);if(e){
+    ['name','id','grade','title','dept','branch','hire','start','sal','nt'].forEach(k=>document.getElementById('f_'+k).value=e[k]||'');
+    document.getElementById('f_lp').value=e.lp||'';document.getElementById('f_py').value=e.py||'3';
+    document.getElementById('f_st').value=e.status||'active';document.getElementById('f_sh').value=e.shift||'morning';
+  }}
+  oo('empModal');
+}
+function saveEmp(){
+  const name=document.getElementById('f_name').value.trim();const empId=document.getElementById('f_id').value.trim();
+  if(!name){alert('الرجاء إدخال اسم الموظف');return;}if(!empId){alert('الرجاء إدخال الرقم الوظيفي');return;}
+  const emps=DB.emps();if(!edId&&emps.find(e=>e.id===empId)){alert('الرقم الوظيفي مستخدم مسبقاً');return;}
+  const emp={id:empId,name,grade:document.getElementById('f_grade').value.trim(),
+    title:document.getElementById('f_title').value.trim(),dept:document.getElementById('f_dept').value.trim(),
+    branch:document.getElementById('f_branch').value.trim(),hire:document.getElementById('f_hire').value,
+    start:document.getElementById('f_start').value,lp:document.getElementById('f_lp').value,
+    py:document.getElementById('f_py').value,status:document.getElementById('f_st').value,
+    shift:document.getElementById('f_sh').value,salary:document.getElementById('f_sal').value,
+    notes:document.getElementById('f_nt').value.trim()};
+  if(edId){const i=emps.findIndex(e=>e.id===edId);if(i>=0)emps[i]=emp;}else emps.push(emp);
+  DB.saveEmps(emps);co('empModal');openEmp(emp.id);
+}
+
+/* ════════════════════════════════════════
+   COURSE CRUD
+════════════════════════════════════════ */
+function openCourseModal(empId){
+  document.getElementById('c_ei').value=empId;
+  ['c_nm','c_pr','c_lc','c_dt','c_ed','c_dy','c_hr','c_no'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('c_ty').value='onsite';document.getElementById('c_st').value='done';oo('courseModal');
+}
+function saveCourse(){
+  const name=document.getElementById('c_nm').value.trim();if(!name){alert('الرجاء إدخال اسم الدورة');return;}
+  const c=DB.courses();
+  c.push({id:'c'+Date.now(),empId:document.getElementById('c_ei').value,name,
+    provider:document.getElementById('c_pr').value.trim(),lecturer:document.getElementById('c_lc').value.trim(),
+    type:document.getElementById('c_ty').value,status:document.getElementById('c_st').value,
+    date:document.getElementById('c_dt').value,enddate:document.getElementById('c_ed').value,
+    days:document.getElementById('c_dy').value,hours:document.getElementById('c_hr').value,
+    notes:document.getElementById('c_no').value.trim()});
+  DB.saveCourses(c);co('courseModal');openEmp(cId);
+}
+
+/* ════════════════════════════════════════
+   OFFICIAL FILE CRUD
+════════════════════════════════════════ */
+function openFileModal(empId){
+  document.getElementById('fi_ei').value=empId;
+  ['fi_nm','fi_rf','fi_nt'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('fi_cat').value='official';document.getElementById('fi_dt').value='';
+  document.getElementById('fi_ut').textContent='اسحب أو اضغط للاختيار';
+  document.getElementById('fi_fl').value='';fiB64=null;fiNm=null;oo('fileModal');
+}
+function saveOF(){
+  const name=document.getElementById('fi_nm').value.trim();if(!name){alert('الرجاء إدخال اسم الوثيقة');return;}
+  const f=DB.files();
+  f.push({id:'f'+Date.now(),empId:document.getElementById('fi_ei').value,name,
+    cat:document.getElementById('fi_cat').value,date:document.getElementById('fi_dt').value,
+    ref:document.getElementById('fi_rf').value.trim(),notes:document.getElementById('fi_nt').value.trim(),
+    fileData:fiB64||null,fileName:fiNm||null});
+  DB.saveFiles(f);co('fileModal');openEmp(cId);
+}
+
+/* ════════════════════════════════════════
+   PERSONAL FILE CRUD
+════════════════════════════════════════ */
+function openPFModal2(empId){openPFModalT(empId,'natid');}
+function openPFModalT(empId,type){
+  document.getElementById('pf_ei').value=empId;document.getElementById('pf_ty').value=type;
+  ['pf_no','pf_is','pf_ex'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('pf_ut').textContent='اسحب أو اضغط للاختيار';
+  document.getElementById('pf_fl').value='';pfB64=null;pfNm=null;oo('pfModal');
+}
+function savePF(){
+  const empId=document.getElementById('pf_ei').value;const type=document.getElementById('pf_ty').value;
+  const pfs=DB.personal();const xi=pfs.findIndex(p=>p.empId===empId&&p.type===type);
+  const rec={id:'p'+Date.now(),empId,type,note:document.getElementById('pf_no').value.trim(),
+    issued:document.getElementById('pf_is').value,expiry:document.getElementById('pf_ex').value,
+    fileData:pfB64||null,fileName:pfNm||null};
+  if(xi>=0)pfs[xi]=rec;else pfs.push(rec);
+  DB.savePersonal(pfs);co('pfModal');openEmp(cId);
+}
+
+/* ════════════════════════════════════════
+   FILE UPLOAD
+════════════════════════════════════════ */
+function hsel(e,p){
+  const file=e.target.files[0];if(!file)return;
+  if(file.size>5*1024*1024){alert('حجم الملف يتجاوز 5MB');return;}
+  if(p==='fi'){fiNm=file.name;document.getElementById('fi_ut').textContent='✅ '+file.name;}
+  else{pfNm=file.name;document.getElementById('pf_ut').textContent='✅ '+file.name;}
+  const r=new FileReader();r.onload=ev=>{if(p==='fi')fiB64=ev.target.result;else pfB64=ev.target.result;};
+  r.readAsDataURL(file);
+}
+function hdrop(e,p){
+  e.preventDefault();const uz=document.getElementById(p==='fi'?'uzOf':'uzPf');uz.classList.remove('drag');
+  const file=e.dataTransfer.files[0];if(!file)return;
+  if(file.size>5*1024*1024){alert('حجم الملف يتجاوز 5MB');return;}
+  if(p==='fi'){fiNm=file.name;document.getElementById('fi_ut').textContent='✅ '+file.name;}
+  else{pfNm=file.name;document.getElementById('pf_ut').textContent='✅ '+file.name;}
+  const r=new FileReader();r.onload=ev=>{if(p==='fi')fiB64=ev.target.result;else pfB64=ev.target.result;};
+  r.readAsDataURL(file);
+}
+
+/* ════════════════════════════════════════
+   CONFIRM DELETE
+════════════════════════════════════════ */
+function cDel(type,id){
+  const msgs={emp:'سيتم حذف ملف الموظف كاملاً مع جميع دوراته وملفاته.',
+    course:'هل تريد حذف هذه الدورة التدريبية؟',file:'هل تريد حذف هذه الوثيقة الرسمية؟',
+    personal:'هل تريد حذف هذا الملف الشخصي؟'};
+  document.getElementById('confirmTxt').textContent=msgs[type]||'هل أنت متأكد؟';
+  document.getElementById('confirmOk').onclick=()=>{
+    if(type==='emp'){DB.saveEmps(DB.emps().filter(e=>e.id!==id));DB.saveCourses(DB.courses().filter(c=>c.empId!==id));
+      DB.saveFiles(DB.files().filter(f=>f.empId!==id));DB.savePersonal(DB.personal().filter(p=>p.empId!==id));
+      co('confirmModal');goWelcome();}
+    else if(type==='course'){DB.saveCourses(DB.courses().filter(c=>c.id!==id));co('confirmModal');openEmp(cId);}
+    else if(type==='file'){DB.saveFiles(DB.files().filter(f=>f.id!==id));co('confirmModal');openEmp(cId);}
+    else if(type==='personal'){DB.savePersonal(DB.personal().filter(p=>p.id!==id));co('confirmModal');openEmp(cId);}
+  };oo('confirmModal');
+}
+
+/* ════════════════════════════════════════
+   OVERLAY
+════════════════════════════════════════ */
+function oo(id){document.getElementById(id).classList.add('open');}
+function co(id){document.getElementById(id).classList.remove('open');}
+document.querySelectorAll('.overlay').forEach(o=>o.addEventListener('click',function(e){if(e.target===this)this.classList.remove('open');}));
+
+/* INIT */
+rSB();
+</script>
+</body>
+</html>
